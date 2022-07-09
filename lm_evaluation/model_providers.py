@@ -3,7 +3,8 @@ from tqdm import tqdm
 import requests
 import os
 import time
-
+# from local_api_call import local_api_call
+from lm_evaluation.local_api_call import local_api_call
 
 class ModelProvider:
     """Base class for a model provider, currently we support API models, but this class can be subclassed with support
@@ -153,12 +154,29 @@ class AI21ModelProvider(APIModelProvider):
             "offset": token_data['textRange']['start'],
             "logprob": token_data['generatedToken']['logprob'],
         } for token_data in prompt_data['tokens']]
+
+        print('*****************')
+        print(data)
+        print('*****************')        
+        # print('text')
+        # print(text)
+        # print('tokens')
+        # print(tokens)
         return text, tokens
+
+class LocalModelProvider(AI21ModelProvider):
+    def __init__(self, model):
+        self._model = model
+
+    def _logprobs(self, text, add_start_text=False):
+        return local_api_call(text)
+
 
 
 _PROVIDER_MAP = {
     "openai": OpenAIModelProvider,
-    "ai21": AI21ModelProvider
+    "ai21": AI21ModelProvider,
+    "local": LocalModelProvider
 }
 
 
